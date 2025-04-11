@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tradução - Frases</title>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .card {
+      background: #222;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px #000;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #4fc3f7;
+    }
+
+    #frase {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    .info {
+      font-size: 12px;
+      margin-bottom: 15px;
+      color: #ccc;
+    }
+
+    button {
+      background: #4fc3f7;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #0288d1;
+    }
+
+    .correto {
+      color: lightgreen;
+      font-weight: bold;
+      margin: 15px 0;
+    }
+
+    .erro {
+      color: red;
+      font-weight: bold;
+      margin: 15px 0;
+    }
+
+    ul {
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="app">
+    <h2>Gmk Idiomas:</h2>
+    <p id="frase"></p>
+    <input type="text" id="resposta" placeholder="Digite em inglês" autocomplete="off" />
+    <div class="info">⚠️ Não use contrações (ex: “wasn't, aren't”).</div>
+    <div id="feedback"></div>
+    <button onclick="verificarResposta()">Verificar</button>
+    <button id="naoSei" onclick="marcarComoNaoSei()">Não lembro</button>
+  </div>
+
+  <script>
+    const frasesOriginais = [
+      { pt: "Ele estava esperando", en: "He was waiting" },
+      { pt: "Ele está esperando?", en: "Is he waiting?" },
+      { pt: "Eles estavam consertando o carro", en: "They were fixing the car" },
+      { pt: "Eles estão se abraçando", en: "They are hugging each other" },
+      { pt: "Eles estavam se abraçando", en: "They were hugging each other" },
+      { pt: "O cachorro não está atacando o gato", en: "The dog is not attacking the cat" },
+      { pt: "O cachorro não estava atacando o gato", en: "The dog was not attacking the cat" },
+      { pt: "Ele estava ajudando o cara", en: "He was helping the guy" },
+      { pt: "Ele está ajudando o cara?", en: "Is he helping the guy?" },
+      { pt: "Eles estavam acordando", en: "They were waking up" }
+    ];
+
+    let frases = [...frasesOriginais];
+    let indice = 0;
+    let acertos = 0;
+    let respostasErradas = [];
+    let respostasCertas = [];
+
+    const fraseElement = () => document.getElementById("frase");
+    const respostaInput = () => document.getElementById("resposta");
+    const feedback = () => document.getElementById("feedback");
+
+    function mostrarFrase() {
+      fraseElement().textContent = frases[indice].pt;
+      respostaInput().value = "";
+      respostaInput().focus();
+      feedback().textContent = "";
+    }
+
+    function verificarResposta() {
+      const resposta = respostaInput().value.trim();
+      const correta = frases[indice].en;
+      if (resposta.toLowerCase() === correta.toLowerCase()) {
+        feedback().textContent = "Correto!";
+        feedback().className = "correto";
+        acertos++;
+        respostasCertas.push(frases[indice]);
+      } else {
+        feedback().textContent = `Errado! Resposta correta: ${correta}`;
+        feedback().className = "erro";
+        respostasErradas.push(frases[indice]);
+      }
+
+      setTimeout(() => {
+        indice++;
+        if (indice < frases.length) {
+          mostrarFrase();
+        } else {
+          concluirAtividade();
+        }
+      }, 1200);
+    }
+
+    function verificarDigitacao(e) {
+      if (e.target.value.trim().toLowerCase() === frases[indice].en.toLowerCase()) {
+        verificarResposta();
+      }
+    }
+
+    function verificarAtalho(e) {
+      if (e.key === "Enter" || e.key === "ArrowRight") {
+        verificarResposta();
+      }
+    }
+
+    function marcarComoNaoSei() {
+      respostasErradas.push(frases[indice]);
+      indice++;
+      if (indice < frases.length) {
+        mostrarFrase();
+      } else {
+        concluirAtividade();
+      }
+    }
+
+    function concluirAtividade() {
+      let listaErradas = "";
+      let listaCertas = "";
+
+      if (respostasErradas.length > 0) {
+        listaErradas = "<h3>Revisar:</h3><ul>";
+        respostasErradas.forEach(f => {
+          listaErradas += `<li>${f.pt} → ${f.en}</li>`;
+        });
+        listaErradas += "</ul>";
+      }
+
+      if (respostasCertas.length > 0) {
+        listaCertas = "<h3>Você acertou:</h3><ul>";
+        respostasCertas.forEach(f => {
+          listaCertas += `<li>${f.pt} → ${f.en}</li>`;
+        });
+        listaCertas += "</ul>";
+      }
+
+      document.getElementById("app").innerHTML = `
+        <h2>Atividade concluída!</h2>
+        <h3>Envie um print da tela para o(a) seu(sua) professor(a).</h3>
+        <p>Você acertou ${acertos}/${frases.length} frases.</p>
+        ${listaCertas}
+        ${listaErradas}
+        <button onclick="location.reload()">🔁 Fazer novamente</button>
+        ${respostasErradas.length > 0 ? '<button onclick="revisarErros()">🔁 Revisar o que eu errei</button>' : ''}
+      `;
+    }
+
+    function revisarErros() {
+      frases = [...respostasErradas];
+      respostasErradas = [];
+      respostasCertas = [];
+      indice = 0;
+      acertos = 0;
+
+      const app = document.getElementById("app");
+      app.innerHTML = `
+        <h2>Gmk Idiomas:</h2>
+        <p id="frase"></p>
+        <input type="text" id="resposta" placeholder="Digite em inglês" autocomplete="off" />
+        <div class="info">⚠️ Não use contrações (ex: “wasn't, aren't”).</div>
+        <div id="feedback"></div>
+        <button onclick="verificarResposta()">Verificar</button>
+        <button id="naoSei" onclick="marcarComoNaoSei()">Não lembro</button>
+      `;
+
+      setTimeout(() => {
+        document.getElementById("resposta").addEventListener("input", verificarDigitacao);
+        document.addEventListener("keydown", verificarAtalho);
+        mostrarFrase();
+      }, 100);
+    }
+
+    // Inicialização
+    respostaInput().addEventListener("input", verificarDigitacao);
+    document.addEventListener("keydown", verificarAtalho);
+    mostrarFrase();
+  </script>
+</body>
+</html>
